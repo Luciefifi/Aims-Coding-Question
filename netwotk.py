@@ -44,3 +44,4 @@ input_network = '''-,14,10,19,-,-,-
 
 max_saving = maximum_spanning_tree(parse_network(input_network))
 print(max_saving)
+# printing the max saving 
