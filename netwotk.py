@@ -1,38 +1,39 @@
-def parse_network(input_network: str):
-    lines = input_network.strip().split('\n')
+import heapq
+
+def maximum_saving(input_network: str) -> int:
+    # Parse the input network
     network = []
-    for line in lines:
-        row = line.split(',')
-        network.append([int(cost) if cost and cost != '-' else float('inf') for cost in row])
-    return network
+    for row in input_network.strip().split('\n'):
+        row_values = []
+        for value in row.split(','):
+            try:
+                row_values.append(int(value))
+            except ValueError:
+                row_values.append(-1)
+        network.append(row_values)
+    n = len(network)
 
-def maximum_spanning_tree(network):
-    num_nodes = len(network)
-    max_spanning_tree = [0] * num_nodes
-    max_spanning_tree[0] = float('inf')
-    visited = [False] * num_nodes
+    # Prim's algorithm
+    start_node = 0
+    visited = [False] * n
+    mst_cost = 0
+    total_cost = sum(network[i][j] for i in range(n) for j in range(i + 1, n) if network[i][j] != -1)
+    heap = [(0, start_node)]  # (cost, node)
 
-    for _ in range(num_nodes):
-        max_cost = 0
-        u = -1
-
-        for node in range(num_nodes):
-            if not visited[node] and max_spanning_tree[node] > max_cost:
-                u = node
-                max_cost = max_spanning_tree[node]
-
+    while heap:
+        cost, u = heapq.heappop(heap)
+        if visited[u]:
+            continue
         visited[u] = True
+        mst_cost += cost
 
-        for v in range(num_nodes):
-            if not visited[v] and network[u][v] > max_spanning_tree[v]:
-                max_spanning_tree[v] = network[u][v]
+        for v in range(n):
+            if network[u][v] != -1 and not visited[v]:
+                heapq.heappush(heap, (network[u][v], v))
 
-    total_cost = sum(sum(cost for cost in row if cost != float('inf')) for row in network)
-    spanning_tree_cost = sum(cost for cost in max_spanning_tree if cost != float('inf'))
+    return total_cost - mst_cost
 
-    max_saving = total_cost - spanning_tree_cost
-    return max_saving
-
+# Test case
 input_network = '''-,14,10,19,-,-,-
 14,-,-,15,18,-,-
 10,-,-,26,,29,-
@@ -41,7 +42,5 @@ input_network = '''-,14,10,19,-,-,-
 -,-,29,17,-,-,25
 -,-,-,21,9,25,-
 '''
-
-max_saving = maximum_spanning_tree(parse_network(input_network))
-print(max_saving)
-# printing the max saving 
+max_saving = maximum_saving(input_network)
+print(max_saving)  # Output: 138
